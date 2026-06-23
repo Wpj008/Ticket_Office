@@ -1,14 +1,17 @@
 package org.example;
 
 import model.Event;
+import model.Reservation;
 import model.Status;
 import model.User;
 import sql.bdd.DatabaseConnection;
 import sql.bdd.EventManager;
+import sql.bdd.ReservationManager;
 import sql.bdd.UserManager;
 
 import java.sql.Connection;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Scanner;
 
 
@@ -94,16 +97,56 @@ public class Main {
 
                        case 1:
 
-                        Event eventList = EventManager.getEvent();
+
+                           List<Event> events = EventManager.getEvent(connectedUser);
 
                            System.out.println("Liste des Evenements !");
 
-                           System.out.println("Titre : " + eventList.getTitlEvent());
-                           System.out.println("Description : " + eventList.getDescriptionEvent());
-                           System.out.println("Lieu : " + eventList.getLieuEvent());
-                           System.out.println("Date et heure : " + eventList.getDatEvent());
-                           System.out.println("Prix : " + eventList.getPricEvent());
-                           System.out.println("Place Disponible : " + eventList.getPlaceTotalEvent());
+                           for (Event event : events) {
+
+                               System.out.println("=====================================");
+
+                               System.out.println("ID Event : " + event.getIdEvent());
+                               System.out.println("Titre : " + event.getTitlEvent());
+                               System.out.println("Description : " + event.getDescriptionEvent());
+                               System.out.println("Lieu : " + event.getLieuEvent());
+                               System.out.println("Date et heure : " + event.getDatEvent());
+                               System.out.println("Prix : " + event.getPricEvent());
+                               System.out.println("Place Disponible : " + event.getPlaceTotalEvent());
+                               System.out.println("=====================================");
+                           }
+
+
+                           System.out.println("Faire une réservation ? 1. [oui]/2.[Non] : ");
+                           Scanner scanReservation = new Scanner(System.in);
+                           byte ResChoice = scanReservation.nextByte();
+
+                           if(ResChoice == 1){
+
+                               System.out.println("ID de l'événement : ");
+                               Scanner scanIdEventRes = new Scanner(System.in);
+                               long choiceEvent = scanIdEventRes.nextLong();
+
+                               System.out.println("Nombre de place : ");
+                               Scanner scanNombrePlace = new Scanner(System.in);
+                               byte choicePlace = scanNombrePlace.nextByte();
+
+                               Status status = new Status();
+
+                               Event eventRes = EventManager.getEventById(choiceEvent);
+
+                               double totalPrice = eventRes.getPricEvent() * choicePlace ;
+
+                               Reservation reservation = new Reservation(connectedUser,eventRes, choicePlace,totalPrice,status );
+
+                               ReservationManager.registerReservation(reservation);
+
+                           } else if(ResChoice == 2){
+                               return;
+                           } else {
+                               System.out.println("Saisie Incorrecte !!");
+                           }
+
 
 
                            break;
@@ -151,24 +194,50 @@ public class Main {
                            System.out.println("Mes Evénements");
 
 
-                           Event eventListByUser = EventManager.getEvent();
+                           List<Event> eventbyUser = EventManager.getEventByUser(connectedUser);
 
                            System.out.println("Liste des Evenements !");
 
-                           System.out.println("Titre : " + eventListByUser.getTitlEvent());
-                           System.out.println("Description : " + eventListByUser.getDescriptionEvent());
-                           System.out.println("Lieu : " + eventListByUser.getLieuEvent());
-                           System.out.println("Date et heure : " + eventListByUser.getDatEvent());
-                           System.out.println("Prix : " + eventListByUser.getPricEvent());
-                           System.out.println("Place Disponible : " + eventListByUser.getPlaceTotalEvent());
+                           for (Event eventUser : eventbyUser) {
 
+                               System.out.println("=====================================");
+
+                               System.out.println("ID Event : " + eventUser.getIdEvent());
+                               System.out.println("Titre : " + eventUser.getTitlEvent());
+                               System.out.println("Description : " + eventUser.getDescriptionEvent());
+                               System.out.println("Lieu : " + eventUser.getLieuEvent());
+                               System.out.println("Date et heure : " + eventUser.getDatEvent());
+                               System.out.println("Prix : " + eventUser.getPricEvent());
+                               System.out.println("Place Disponible : " + eventUser.getPlaceTotalEvent());
+
+                               System.out.println("=====================================");
+                           }
                            break;
 
                        case 4:
 
                            System.out.println("Mes Réséervation");
 
+
+                           List<Reservation> reservationbyUser = ReservationManager.getReservationByUser(connectedUser);
+
+                           System.out.println("Liste des Réservations !");
+
+                           for (Reservation reservationUser : reservationbyUser) {
+
+                               System.out.println("=====================================");
+
+                               System.out.println(" User : " + reservationUser.getUserId().getFirstName());
+                               System.out.println("Titre Event : " + reservationUser.getEventId().getTitlEvent());
+                               System.out.println("Nombre de place réservé : " + reservationUser.getNombrePlaces());
+                               System.out.println("Prix Total de la réservation : " + reservationUser.getTotalPrice());
+                               System.out.println("Status de la réservation : " + reservationUser.getStatusReservation().getNameStatus());
+
+
+                               System.out.println("=====================================");
+                           }
                            break;
+
                        case 5:
 
                            System.out.println("Déconnexion");
